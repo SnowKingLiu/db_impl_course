@@ -126,7 +126,8 @@ RC Table::destroy(const char* dir) {
   RC rc = sync();
   if(rc != RC::SUCCESS) return rc;
 
-  //TODO 删除描述表元数据的文件
+  // 删除描述表元数据的文件
+    unlink(dir);
 
   //TODO 删除表数据文件
 

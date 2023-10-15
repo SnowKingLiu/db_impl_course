@@ -17,6 +17,7 @@ See the Mulan PSL v2 for more details. */
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <vector>
+#include <unistd.h>
 
 #include "common/log/log.h"
 #include "common/os/path.h"
@@ -78,15 +79,23 @@ RC Db::create_table(const char *table_name, int attribute_count, const AttrInfo 
 
 RC Db::drop_table(const char* table_name)
 {
-  //TODO 从表list(opened_tables_)中找出表指针
+    // 从表list(opened_tables_)中找出表指针
+    Table *table = opened_tables_[table_name];
+    // 找不到表，要返回错误
+    if (table == nullptr) {
+        return RC::SCHEMA_TABLE_NOT_EXIST;
+    }
 
-  //TODO 找不到表，要返回错误
+    // 调用 table->destroy 函数，让表自己销毁资源
+    std::string table_file_path = table_meta_file(path_.c_str(), table_name);
+    table -> destroy(table_file_path.c_str());
 
-  //TODO 调用 table->destroy 函数，让表自己销毁资源
+    std::string data_file = table_data_file(path_.c_str(),  table_name);
+    unlink(data_file.c_str());
 
-  //TODO 删除成功的话，从表list中将它删除
-
-  return RC::GENERIC_ERROR;
+    // 删除成功的话，从表list中将它删除
+    opened_tables_.erase(table_name);
+    return RC::SUCCESS;
 }
 
 Table *Db::find_table(const char *table_name) const
