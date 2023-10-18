@@ -15,6 +15,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/executor/tuple.h"
 #include "storage/common/table.h"
 #include "common/log/log.h"
+#include <ctime>
 
 Tuple::Tuple(const Tuple &other)
 {
@@ -256,12 +257,15 @@ void TupleRecordConverter::add_record(const char *record)
         tuple.add(s, strlen(s));
       } break;
       case DATES: {
-        // TODO 从record中读取存储的日期
-
-        // TODO 将日期转换为满足输出格式的字符串，注意这里月份和天数，不足两位时需要填充0
-
-        // TODO 将字符串添加到tuple中
-
+        // 从record中读取存储的日期
+        int value = *(int *)(record + field_meta->offset());
+        // 将日期转换为满足输出格式的字符串，注意这里月份和天数，不足两位时需要填充0
+        char s[10];
+        time_t ts = time_t(value);
+        struct tm *t = localtime(&ts);
+        strftime(s, 11, "%Y-%m-%d", t);
+        // 将字符串添加到tuple中
+        tuple.add(s, strlen(s));
       }break;
       default: {
         LOG_PANIC("Unsupported field type. type=%d", field_meta->type());

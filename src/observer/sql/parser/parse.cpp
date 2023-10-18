@@ -58,27 +58,62 @@ void value_init_string(Value *value, const char *v)
   value->data = strdup(v);
 }
 
-bool check_date(int y, int m, int d)
+
+int check_date(int y, int m, int d)
 {
-  // TODO 根据 y:year,m:month,d:day 校验日期是否合法
-  // TODO 合法 return 0
-  // TODO 不合法 return 1
-  return 1;
+  // 根据 y:year,m:month,d:day 校验日期是否合法
+  // 合法 return 0
+  // 不合法 return 1
+  if ((y < 1970) || (y > 2038)) {
+    return 1;
+  }
+  if ((m > 12) || (m < 1)) {
+    return 1;
+  }
+  std::vector<int> bigMonth = {1, 3, 5, 7, 8, 10, 12};
+  if (bigMonth.end() != std::find(bigMonth.begin(), bigMonth.end(), m)) {
+    if ((d > 31) || (d < 1)) {
+      return 1;
+    }
+  } else if (m == 2) {
+    if ((y % 400 == 0) || ((y % 400 != 0) && y % 4 == 0)) {
+      if ((d > 29) || (d < 1)) {
+        return 1;
+      }
+    } else if ((d > 28) || (d < 1)) {
+      return 1;
+    }
+  } else if ((d > 30) || (d < 1)) {
+    return 1;
+  }
+  return 0;
 }
 
 int value_init_date(Value *value, const char *v) {
-  // TODO 将 value 的 type 属性修改为日期属性:DATES
+  // 将 value 的 type 属性修改为日期属性:DATES
+  value -> type = DATES;
 
   // 从lex的解析中读取 year,month,day
-  int y,m,d;
+  int y, m, d;
   sscanf(v, "%d-%d-%d", &y, &m, &d);//not check return value eq 3, lex guarantee
   // 对读取的日期做合法性校验
-  bool b = check_date(y,m,d);
-  if(!b) return -1;
-  // TODO 将日期转换成整数
+  int b = check_date(y,m,d);
+  if(b == 1) return -1;
+  // 将日期转换成整数
+  std::cout<< b <<std::endl;
+  struct tm tm;
+  memset(&tm, 0, sizeof(tm));
+  tm.tm_year = y;
+  tm.tm_mon = m;
+  tm.tm_mday = d;
 
-  // TODO 将value 的 data 属性修改为转换后的日期
+  tm.tm_year -= 1900;
+  tm.tm_mon--;
 
+  // 将value 的 data 属性修改为转换后的日期
+  time_t t = mktime(&tm);
+  value->data = malloc(sizeof(DATES));
+  memcpy(value->data, &t, sizeof(t));
   return 0;
 }
 
@@ -92,7 +127,7 @@ void value_destroy(Value *value)
 
 
 void condition_init(Condition *condition, CompOp comp, int left_is_attr, RelAttr *left_attr, Value *left_value,
-    int right_is_attr, RelAttr *right_attr, Value *right_value)
+                    int right_is_attr, RelAttr *right_attr, Value *right_value)
 {
   condition->comp = comp;
   condition->left_is_attr = left_is_attr;
@@ -218,7 +253,7 @@ void deletes_destroy(Deletes *deletes)
 }
 
 void updates_init(Updates *updates, const char *relation_name, const char *attribute_name, Value *value,
-    Condition conditions[], size_t condition_num)
+                  Condition conditions[], size_t condition_num)
 {
   updates->relation_name = strdup(relation_name);
   updates->attribute_name = strdup(attribute_name);
@@ -278,7 +313,7 @@ void drop_table_destroy(DropTable *drop_table)
 }
 
 void create_index_init(
-    CreateIndex *create_index, const char *index_name, const char *relation_name, const char *attr_name)
+        CreateIndex *create_index, const char *index_name, const char *relation_name, const char *attr_name)
 {
   create_index->index_name = strdup(index_name);
   create_index->relation_name = strdup(relation_name);

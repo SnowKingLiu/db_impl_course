@@ -23,13 +23,13 @@ const static Json::StaticString FIELD_TYPE("type");
 const static Json::StaticString FIELD_OFFSET("offset");
 const static Json::StaticString FIELD_LEN("len");
 const static Json::StaticString FIELD_VISIBLE("visible");
-// TODO 向属性元数据中增加dates属性
+// 向属性元数据中增加dates属性
 const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "dates"};
 
 const char *attr_type_to_string(AttrType type)
 {
-  //TODO 修改范围，将DATES添加到type的检验中
-  if (type >= UNDEFINED && type <= FLOATS) {
+  // 修改范围，将DATES添加到type的检验中
+  if (type >= UNDEFINED && type <= DATES) {
     return ATTR_TYPE_NAME[type];
   }
   return "unknown";
@@ -57,7 +57,7 @@ RC FieldMeta::init(const char *name, AttrType attr_type, int attr_offset, int at
 
   if (AttrType::UNDEFINED == attr_type || attr_offset < 0 || attr_len <= 0) {
     LOG_WARN(
-        "Invalid argument. name=%s, attr_type=%d, attr_offset=%d, attr_len=%d", name, attr_type, attr_offset, attr_len);
+            "Invalid argument. name=%s, attr_type=%d, attr_offset=%d, attr_len=%d", name, attr_type, attr_offset, attr_len);
     return RC::INVALID_ARGUMENT;
   }
 
