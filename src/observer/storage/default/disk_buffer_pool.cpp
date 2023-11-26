@@ -52,8 +52,17 @@ Frame *BPManager::alloc(int file_desc, PageNum page_num) {
    * 提示：调用disk_buffer_pool->flush_block()来刷新到磁盘
    * 提示：调用lrucache.victim(victim, new_buffer_tag) 来将vitim页给替换了。
    */
-  
-  return nullptr;
+//  if (lrucache.size() < lrucache._max_size) {
+//  }
+//
+//  BufferTag victim;
+//  lrucache.getVictim(&victim, not_pinned, (void *)(this));
+//  BufferTag newBufferTag(file_desc, page_num);
+//  lrucache.victim(victim, newBufferTag);
+
+
+  return frame;
+//  return nullptr;
 }
 
 void BPManager::printLruCache() {
